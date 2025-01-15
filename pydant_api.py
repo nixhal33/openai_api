@@ -50,9 +50,9 @@ def get_single_movie_by_title(film_title: str):
     val=(film_title,)
     mycursor.execute(sql,val)
     movie=mycursor.fetchall()
-    if film_title not in movie:
-        return {"Error": "Movie not found"}
 
+    if not len(movie):
+        return HTTPException(status_code=404,detail="Sorry! The title you have provided is not in the database")
     return movie[0]
 
 #this will add the movie
