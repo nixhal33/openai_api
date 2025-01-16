@@ -52,7 +52,7 @@ def get_single_movie_by_title(film_title: str):
     movie=mycursor.fetchall()
 
     if not len(movie):
-        return HTTPException(status_code=404,detail="Sorry! The title you have provided is not in the database")
+        raise HTTPException(status_code=500,detail="Sorry! The title you have provided is not in the database")
     return movie[0]
 
 #this will add the movie
