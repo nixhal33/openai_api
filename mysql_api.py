@@ -2,8 +2,17 @@
 
 from fastapi import FastAPI,HTTPException
 import mysql.connector
+from pydantic import BaseModel
+from typing import Optional
+
 
 app=FastAPI()
+
+class movies(BaseModel):
+    title:str
+    year:int
+    storyline:Optional[str]=None # this is if the value is optional or not need to give any storyline
+
 
 # connecting to the database
 mydb=mysql.connector.connect(host="localhost",user="root",password="",database="movies") # here database name is movies but the table name in the database is films
