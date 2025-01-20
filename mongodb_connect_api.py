@@ -16,9 +16,9 @@ app = FastAPI()
 
 # MongoDB connection
 # Replace <db_username> and <db_password> with your actual MongoDB Atlas username and password.
-client = MongoClient("mongodb+srv://nixhell816:3W0duaoqG7chmMpR@moviedb.qeg9l.mongodb.net/")
-db = client["movies_api"]  # Specify the database name
-collection = db["films"]  # Specify the collection name
+client = MongoClient("mongodb+srv://nixhalkoirala8:69TQmZkvl3hsHaB1@crudapi.pesdf.mongodb.net/")
+db = client["crudapi"]  # Specify the database name
+collection = db["movie"]  # Specify the collection name
 
 # Define a Pydantic model for movies
 class Movie(BaseModel):
@@ -40,7 +40,7 @@ def get_movies():
     Get all movies from the MongoDB collection.
     Excludes the `_id` field for compatibility with the Pydantic model.
     """
-    movies = list(collection.find({}, {"_id": 0}))  # Retrieve all movies and exclude `_id`
+    movies = list(collection.find({}, {"_id": 0}))  # Retrieve all movies and exclude `_id` no. 0
     return movies
 
 @app.get("/film/{film_id}", response_model=Movie)
@@ -98,3 +98,16 @@ def update_movie(film_id: str, movie: Movie):
         return movie  # Return the updated movie
     except:
         raise HTTPException(status_code=400, detail="Invalid movie ID format")
+    
+@app.get("/film/{title}")
+def get_movie_by_title(title: str):
+    try:
+        print(f"Searching for movie title: {title}")
+        movie = collection.find_one({"title": {"$regex": f"^{title}$", "$options": "i"}}) # Query MongoDB no matter if the case sensitive
+        if not movie:
+            raise HTTPException(status_code=404, detail="Movie not found")
+        movie["title"]=str(movie["title"])
+        return movie  # Return the movie
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=400, detail=f"An error occurred: {str(e)}")
