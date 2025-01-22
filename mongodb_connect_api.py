@@ -99,15 +99,42 @@ def update_movie(film_id: str, movie: Movie):
     except:
         raise HTTPException(status_code=400, detail="Invalid movie ID format")
     
-@app.get("/film/{title}")
+@app.get("/film/title/{title}")
 def get_movie_by_title(title: str):
+    """
+    get a movie by its title
+    Converts the string `title` to an ObjectId for querying MongoDB.
+    If the movie is not found, raises a 404 error.
+    """
     try:
         print(f"Searching for movie title: {title}")
-        movie = collection.find_one({"title": {"$regex": f"^{title}$", "$options": "i"}}) # Query MongoDB no matter if the case sensitive
+        movie = collection.find_one({"title": {"$regex": f"^{title}$", "$options": "i"}}) # Query MongoDB no matter if it's case sensitive
         if not movie:
             raise HTTPException(status_code=404, detail="Movie not found")
-        movie["title"]=str(movie["title"])
+        movie["_id"]=str(movie["_id"])
         return movie  # Return the movie
     except Exception as e:
         print(f"Error: {e}")
         raise HTTPException(status_code=400, detail=f"An error occurred: {str(e)}")
+
+@app.delete("/film/title/{title}")
+def delete_movie_by_title(title: str):
+    """
+    Delete a movie by its title.
+    Uses a case-insensitive query to match the title.
+    If no movies are found, raises a 404 error.
+    """
+    try:
+        print(f"Searching for movie title: {title}")
+
+        # Case-insensitive deletion
+        result = collection.delete_many({"title": {"$regex": f"^{title}$", "$options": "i"}})
+        
+        # Check if any documents were deleted
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Movie title not found")
+        
+        return {"message": " Your inputted movie has been deleted successfully."}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid movie title: {str(e)}")
